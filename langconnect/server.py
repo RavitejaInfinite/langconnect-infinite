@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from langconnect.api import collections_router, documents_router
 from langconnect.config import ALLOWED_ORIGINS
 from langconnect.database.collections import CollectionsManager
+from langconnect.middleware import JWTAuthMiddleware
 
 # Configure logging
 logging.basicConfig(
@@ -37,7 +38,7 @@ APP = FastAPI(
     lifespan=lifespan,
 )
 
-# Add CORS middleware
+# Add CORS middleware (must be added first)
 APP.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
@@ -45,6 +46,9 @@ APP.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Add JWT authentication middleware
+APP.add_middleware(JWTAuthMiddleware, excluded_paths=["/health"])
 
 # Include API routers
 APP.include_router(collections_router)
